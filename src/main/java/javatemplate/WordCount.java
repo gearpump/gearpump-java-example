@@ -22,31 +22,27 @@ import org.apache.gearpump.cluster.UserConfig;
 import org.apache.gearpump.cluster.client.ClientContext;
 import org.apache.gearpump.partitioner.HashPartitioner;
 import org.apache.gearpump.partitioner.Partitioner;
-import org.apache.gearpump.streaming.AppDescription;
-import org.apache.gearpump.streaming.TaskDescription;
+import org.apache.gearpump.streaming.Processor;
+import org.apache.gearpump.streaming.Processor.DefaultProcessor;
+import org.apache.gearpump.streaming.StreamApplication;
+import org.apache.gearpump.streaming.task.Task;
 import org.apache.gearpump.util.Graph;
 
 public class WordCount {
 
-  /**
-   * example: WordCount 127.0.0.1:3000
-   * @param args
-   */
   public static void main(String[] args) {
-    String master = args[0];
 
-    ClientContext context = ClientContext.apply(master);
-
-    //define the topology graph
-    Graph<TaskDescription, Partitioner> graph = Graph.empty();
+    ClientContext context = ClientContext.apply();
 
     // For split task, we config to create two tasks
     int splitTaskNumber = 2;
-    TaskDescription split = new TaskDescription(Split.class.getName(), splitTaskNumber);
+    Processor split = new DefaultProcessor(splitTaskNumber, null, null, Split.class);
 
     // For sum task, we have two summer.
     int sumTaskNumber = 2;
-    TaskDescription sum = new TaskDescription(Sum.class.getName(), sumTaskNumber);
+    Processor sum = new DefaultProcessor(sumTaskNumber, null, null, Sum.class);
+
+    Graph<Processor<? extends Task>, Partitioner> graph = Graph.empty();
 
     // construct the graph
     graph.addVertex(split);
@@ -55,8 +51,8 @@ public class WordCount {
     graph.addEdge(split, partitioner, sum);
 
     // submit
-    AppDescription app = new AppDescription("javawordcount", UserConfig.empty(), graph, null);
-    context.submit(AppDescription.AppDescriptionToApplication(app, context.system()));
+    StreamApplication app = StreamApplication.apply("javawordcount", graph, UserConfig.empty(), null);
+    context.submit(app);
 
     // clean resource
     context.close();
