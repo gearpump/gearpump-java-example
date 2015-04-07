@@ -42,7 +42,7 @@ public class WordCount {
     int sumTaskNumber = 2;
     Processor sum = new DefaultProcessor(sumTaskNumber, null, null, Sum.class);
 
-    Graph<Processor<? extends Task>, Partitioner> graph = Graph.empty();
+    Graph graph = Graph.empty();
 
     // construct the graph
     graph.addVertex(split);
