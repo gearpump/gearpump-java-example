@@ -6,9 +6,9 @@ After build, there is a jar under target, streaming-java-template-1.0-SNAPSHOT.j
 
 How to run
 ============
-1. Start the gearpump cluster (0.3.3)
+1. Start the gearpump cluster (0.3.4)
 
-  a) Download from https://github.com/intel-hadoop/gearpump/releases/download/0.3.1/binary.gearpump.tar.gz
+  a) Download from http://www.gearpump.io/site/downloads/
 
   b) After extraction,  start the local cluster,
   ```bash
@@ -17,12 +17,12 @@ How to run
 
   c) Start the UI server
   ```bash
-  bin/services -master 127.0.0.1:3000
+  bin/services
   ```
 
 2. Submit the wordcount-jar
   ```bash
-  bin/gear app -jar path/to/streaming-java-template-1.0-SNAPSHOT.jar javatemplate.WordCount 127.0.0.1:3000
+  bin/gear app -jar path/to/streaming-java-template-1.0-SNAPSHOT.jar javatemplate.WordCount
   ```
   
 3. Check the UI
