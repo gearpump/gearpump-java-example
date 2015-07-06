@@ -2,7 +2,7 @@ How to Build
 =============
 mvn package
 
-After build, there is a jar under target, streaming-java-template-1.1-SNAPSHOT.jar
+After build, there is a jar under `target/streaming-java-template-1.1-SNAPSHOT.jar`.
 
 How to run
 ============
