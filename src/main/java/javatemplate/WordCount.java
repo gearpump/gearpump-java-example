@@ -51,7 +51,7 @@ public class WordCount {
     graph.addEdge(split, partitioner, sum);
 
     // submit
-    StreamApplication app = StreamApplication.apply("javawordcount", graph, UserConfig.empty(), null);
+    StreamApplication app = StreamApplication.apply("javawordcount", graph, UserConfig.empty());
     context.submit(app);
 
     // clean resource
