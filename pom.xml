@@ -8,7 +8,7 @@
     <artifactId>streaming-java-template</artifactId>
     <version>1.1-SNAPSHOT</version>
     <properties>
-        <gearpumpVersion>0.3.7</gearpumpVersion>
+        <gearpumpVersion>0.3.8-SNAPSHOT</gearpumpVersion>
     </properties>
 
 

@@ -6,7 +6,7 @@ After build, there is a jar under `target/streaming-java-template-1.1-SNAPSHOT.j
 
 How to run
 ============
-1. Start the gearpump cluster (0.3.7)
+1. Start the gearpump cluster (0.3.8-SNAPSHOT)
 
   a) Download from http://www.gearpump.io/site/downloads/
 
