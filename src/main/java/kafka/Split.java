@@ -7,7 +7,7 @@ import org.apache.gearpump.streaming.task.TaskContext;
 import org.apache.gearpump.cluster.UserConfig;
 
 
-class Split extends Task {
+public class Split extends Task {
 
     private TaskContext context;
     private UserConfig userConf;
@@ -25,12 +25,11 @@ class Split extends Task {
     public void onStart(StartTime startTime) {
     }
 
-    public void onNext(Message msg) {
-        String line = new String((byte[])(msg.msg()));
-        String[] words = line.split(" ");
+    public void onNext(Message message) {
+        String line = new String((byte[])(message.msg()));
+        String[] words = line.split("\\s+");
         for (int i = 0; i < words.length; i++) {
             context.output(new Message(words[i], now()));
         }
-        self().tell(new Message("next", now()), self());
     }
 }
