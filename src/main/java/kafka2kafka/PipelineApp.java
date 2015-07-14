@@ -1,19 +1,19 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- *  or more contributor license agreements.  See the NOTICE file
- *  distributed with this work for additional information
- *  regarding copyright ownership.  The ASF licenses this file
- *  to you under the Apache License, Version 2.0 (the
- *  "License"); you may not use this file except in compliance
- *  with the License.  You may obtain a copy of the License at
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 
@@ -45,11 +45,11 @@ public class PipelineApp {
         KafkaSource kafkaSource = new KafkaSource("inputTopic", "localhost:2181");
         Processor sourceProcessor = DataSourceProcessor.apply(kafkaSource, taskNumber, "kafkaSource", appConfig, context.system());
 
-        // converter (converts byte[] message to String -- kafka produces byte[]
+        // converter (converts byte[] message to String -- kafka produces byte[])
         Processor convert2BytesProcessor = new DefaultProcessor(taskNumber, "converter", null, ByteArray2StringTask.class);
 
         // converter (converts String message to scala.Tuple2 -- kafka sink needs it)
-        Processor convertr2TupleProcessor = new DefaultProcessor(taskNumber, "converter", null, String2Tuple2Task.class);
+        Processor convert2TupleProcessor = new DefaultProcessor(taskNumber, "converter", null, String2Tuple2Task.class);
 
         // simple processor (represents processing you would do on kafka messages stream; writes payload to logs)
         Processor logProcessor = new DefaultProcessor(taskNumber, "forwarder", null, LogMessageTask.class);
@@ -62,7 +62,7 @@ public class PipelineApp {
         graph.addVertex(sourceProcessor);
         graph.addVertex(convert2BytesProcessor);
         graph.addVertex(logProcessor);
-        graph.addVertex(convertr2TupleProcessor);
+        graph.addVertex(convert2TupleProcessor);
         graph.addVertex(sinkProcessor);
 
         Partitioner partitioner = new HashPartitioner();
@@ -70,9 +70,8 @@ public class PipelineApp {
 
         graph.addEdge(sourceProcessor, shufflePartitioner, convert2BytesProcessor);
         graph.addEdge(convert2BytesProcessor, partitioner, logProcessor);
-        graph.addEdge(logProcessor, partitioner, convertr2TupleProcessor);
-
-        graph.addEdge(convertr2TupleProcessor, partitioner, sinkProcessor);
+        graph.addEdge(logProcessor, partitioner, convert2TupleProcessor);
+        graph.addEdge(convert2TupleProcessor, partitioner, sinkProcessor);
 
         // submit app
         StreamApplication app = StreamApplication.apply("kafka2kafka", graph, appConfig);

@@ -128,3 +128,10 @@ Check if anything appears on output topic:
 ```bash
 kafka/bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic outputTopic --from-beginning
 ```
+
+The tasks write to application logs, so you can browse them to see execution flow. 
+
+The logs should be under location similar to this: 
+```
+$GEARPUMP_HOME/logs/applicationData/<<user>>/<<date>>/<<appN>>/
+```
