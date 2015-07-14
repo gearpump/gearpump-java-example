@@ -17,21 +17,23 @@
  *
  */
 
-package kafka;
+package kafka2kafka;
 
 import org.apache.gearpump.Message;
+import org.apache.gearpump.cluster.UserConfig;
 import org.apache.gearpump.streaming.task.StartTime;
 import org.apache.gearpump.streaming.task.Task;
 import org.apache.gearpump.streaming.task.TaskContext;
-import org.apache.gearpump.cluster.UserConfig;
+import org.slf4j.Logger;
 
-
-public class Split extends Task {
+public class ByteArray2StringTask extends Task {
 
     private TaskContext context;
     private UserConfig userConf;
 
-    public Split(TaskContext taskContext, UserConfig userConf) {
+    private Logger LOG = super.LOG();
+
+    public ByteArray2StringTask(TaskContext taskContext, UserConfig userConf) {
         super(taskContext, userConf);
         this.context = taskContext;
         this.userConf = userConf;
@@ -41,14 +43,28 @@ public class Split extends Task {
         return System.currentTimeMillis();
     }
 
+    @Override
     public void onStart(StartTime startTime) {
+        LOG.info("ByteArray2StringTask.onStart [" + startTime + "]");
     }
 
-    public void onNext(Message message) {
-        String line = new String((byte[])(message.msg()));
-        String[] words = line.split("\\s+");
-        for (int i = 0; i < words.length; i++) {
-            context.output(new Message(words[i], now()));
+    /**
+     * Convert message payload to String if it is byte[]. Leave as is otherwise.
+     * @param messagePayLoad
+     */
+    @Override
+    public void onNext(Message messagePayLoad) {
+        LOG.info("ByteArray2StringTask.onNext messagePayLoad = [" + messagePayLoad + "]");
+        LOG.debug("message.msg class" + messagePayLoad.msg().getClass().getCanonicalName());
+
+        Object msg = messagePayLoad.msg();
+
+        if (msg instanceof byte[]) {
+            LOG.debug("converting to String.");
+            context.output(new Message(new String((byte[]) msg), now()));
+        } else {
+            LOG.debug("sending message as is.");
+            context.output(new Message(msg, now()));
         }
     }
 }

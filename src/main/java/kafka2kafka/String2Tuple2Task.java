@@ -17,21 +17,26 @@
  *
  */
 
-package kafka;
+package kafka2kafka;
 
 import org.apache.gearpump.Message;
+import org.apache.gearpump.cluster.UserConfig;
 import org.apache.gearpump.streaming.task.StartTime;
 import org.apache.gearpump.streaming.task.Task;
 import org.apache.gearpump.streaming.task.TaskContext;
-import org.apache.gearpump.cluster.UserConfig;
+import org.slf4j.Logger;
+import scala.Tuple2;
 
+import java.io.UnsupportedEncodingException;
 
-public class Split extends Task {
+public class String2Tuple2Task extends Task {
 
     private TaskContext context;
     private UserConfig userConf;
 
-    public Split(TaskContext taskContext, UserConfig userConf) {
+    private Logger LOG = super.LOG();
+
+    public String2Tuple2Task(TaskContext taskContext, UserConfig userConf) {
         super(taskContext, userConf);
         this.context = taskContext;
         this.userConf = userConf;
@@ -41,14 +46,27 @@ public class Split extends Task {
         return System.currentTimeMillis();
     }
 
-    public void onStart(StartTime startTime) {
+    @Override public void onStart(StartTime startTime) {
+        LOG.info("String2Tuple2Task.onStart [" + startTime + "]");
     }
 
-    public void onNext(Message message) {
-        String line = new String((byte[])(message.msg()));
-        String[] words = line.split("\\s+");
-        for (int i = 0; i < words.length; i++) {
-            context.output(new Message(words[i], now()));
+    @Override public void onNext(Message messagePayLoad) {
+        LOG.info("String2Tuple2Task.onNext messagePayLoad = [" + messagePayLoad + "]");
+
+        Object msg = messagePayLoad.msg();
+
+        byte[] key = null;
+        byte[] value = null;
+        try {
+            LOG.info("converting to Tuple2");
+            key = "message".getBytes("UTF-8");
+            value = ((String) msg).getBytes("UTF-8");
+            Tuple2<byte[], byte[]> tuple = new Tuple2<byte[], byte[]>(key, value);
+            context.output(new Message(tuple, now()));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            LOG.info("sending message as is.");
+            context.output(new Message(msg, now()));
         }
     }
 }
