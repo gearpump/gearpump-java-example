@@ -54,6 +54,11 @@
             <artifactId>gearpump-external-kafka_2.11</artifactId>
             <version>${gearpumpVersion}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.intel-hadoop</groupId>
+            <artifactId>gearpump-external-hbase_2.11</artifactId>
+            <version>${gearpumpVersion}</version>
+        </dependency>
     </dependencies>
 
     <build>
