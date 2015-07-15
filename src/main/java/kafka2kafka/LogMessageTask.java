@@ -28,29 +28,29 @@ import org.slf4j.Logger;
 
 public class LogMessageTask extends Task {
 
-    private TaskContext context;
-    private UserConfig userConf;
+  private TaskContext context;
+  private UserConfig userConf;
 
-    private Logger LOG = super.LOG();
+  private Logger LOG = super.LOG();
 
-    public LogMessageTask(TaskContext taskContext, UserConfig userConf) {
-        super(taskContext, userConf);
-        this.context = taskContext;
-        this.userConf = userConf;
-    }
+  public LogMessageTask(TaskContext taskContext, UserConfig userConf) {
+    super(taskContext, userConf);
+    this.context = taskContext;
+    this.userConf = userConf;
+  }
 
-    private Long now() {
-        return System.currentTimeMillis();
-    }
+  private Long now() {
+    return System.currentTimeMillis();
+  }
 
-    @Override
-    public void onStart(StartTime startTime) {
-        LOG.info("LogMessageTask.onStart startTime [" + startTime + "]");
-    }
+  @Override
+  public void onStart(StartTime startTime) {
+    LOG.info("LogMessageTask.onStart startTime [" + startTime + "]");
+  }
 
-    @Override
-    public void onNext(Message messagePayLoad) {
-        LOG.info("LogMessageTask.onNext messagePayLoad = [" + messagePayLoad + "]");
-        context.output(new Message(messagePayLoad.msg(), now()));
-    }
+  @Override
+  public void onNext(Message messagePayLoad) {
+    LOG.info("LogMessageTask.onNext messagePayLoad = [" + messagePayLoad + "]");
+    context.output(new Message(messagePayLoad.msg(), now()));
+  }
 }

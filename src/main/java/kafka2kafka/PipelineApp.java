@@ -35,49 +35,50 @@ import org.apache.gearpump.util.Graph;
 
 public class PipelineApp {
 
-    public static void main(String[] args) {
-        ClientContext context = ClientContext.apply();
-        UserConfig appConfig = UserConfig.empty();
+  public static void main(String[] args) {
+    ClientContext context = ClientContext.apply();
+    UserConfig appConfig = UserConfig.empty();
 
-        int taskNumber = 1;
+    int taskNumber = 1;
 
-        // kafka source
-        KafkaSource kafkaSource = new KafkaSource("inputTopic", "localhost:2181");
-        Processor sourceProcessor = DataSourceProcessor.apply(kafkaSource, taskNumber, "kafkaSource", appConfig, context.system());
+    // kafka source
+    KafkaSource kafkaSource = new KafkaSource("inputTopic", "localhost:2181");
+    Processor sourceProcessor = DataSourceProcessor.apply(kafkaSource, taskNumber, "kafkaSource",
+        appConfig, context.system());
 
-        // converter (converts byte[] message to String -- kafka produces byte[])
-        Processor convert2BytesProcessor = new DefaultProcessor(taskNumber, "converter", null, ByteArray2StringTask.class);
+    // converter (converts byte[] message to String -- kafka produces byte[])
+    Processor convert2StringProcessor = new DefaultProcessor(taskNumber, "converter", null, ByteArray2StringTask.class);
 
-        // converter (converts String message to scala.Tuple2 -- kafka sink needs it)
-        Processor convert2TupleProcessor = new DefaultProcessor(taskNumber, "converter", null, String2Tuple2Task.class);
+    // converter (converts String message to scala.Tuple2 -- kafka sink needs it)
+    Processor convert2TupleProcessor = new DefaultProcessor(taskNumber, "converter", null, String2Tuple2Task.class);
 
-        // simple processor (represents processing you would do on kafka messages stream; writes payload to logs)
-        Processor logProcessor = new DefaultProcessor(taskNumber, "forwarder", null, LogMessageTask.class);
+    // simple processor (represents processing you would do on kafka messages stream; writes payload to logs)
+    Processor logProcessor = new DefaultProcessor(taskNumber, "forwarder", null, LogMessageTask.class);
 
-        // kafka sink
-        KafkaSink kafkaSink = new KafkaSink("outputTopic", "localhost:9092");
-        Processor sinkProcessor = DataSinkProcessor.apply(kafkaSink, taskNumber, "sink", appConfig, context.system());
+    // kafka sink
+    KafkaSink kafkaSink = new KafkaSink("outputTopic", "localhost:9092");
+    Processor sinkProcessor = DataSinkProcessor.apply(kafkaSink, taskNumber, "sink", appConfig, context.system());
 
-        Graph graph = Graph.empty();
-        graph.addVertex(sourceProcessor);
-        graph.addVertex(convert2BytesProcessor);
-        graph.addVertex(logProcessor);
-        graph.addVertex(convert2TupleProcessor);
-        graph.addVertex(sinkProcessor);
+    Graph graph = Graph.empty();
+    graph.addVertex(sourceProcessor);
+    graph.addVertex(convert2StringProcessor);
+    graph.addVertex(logProcessor);
+    graph.addVertex(convert2TupleProcessor);
+    graph.addVertex(sinkProcessor);
 
-        Partitioner partitioner = new HashPartitioner();
-        Partitioner shufflePartitioner = new ShufflePartitioner();
+    Partitioner partitioner = new HashPartitioner();
+    Partitioner shufflePartitioner = new ShufflePartitioner();
 
-        graph.addEdge(sourceProcessor, shufflePartitioner, convert2BytesProcessor);
-        graph.addEdge(convert2BytesProcessor, partitioner, logProcessor);
-        graph.addEdge(logProcessor, partitioner, convert2TupleProcessor);
-        graph.addEdge(convert2TupleProcessor, partitioner, sinkProcessor);
+    graph.addEdge(sourceProcessor, shufflePartitioner, convert2StringProcessor);
+    graph.addEdge(convert2StringProcessor, partitioner, logProcessor);
+    graph.addEdge(logProcessor, partitioner, convert2TupleProcessor);
+    graph.addEdge(convert2TupleProcessor, partitioner, sinkProcessor);
 
-        // submit app
-        StreamApplication app = StreamApplication.apply("kafka2kafka", graph, appConfig);
-        context.submit(app);
+    // submit app
+    StreamApplication app = StreamApplication.apply("kafka2kafka", graph, appConfig);
+    context.submit(app);
 
-        // clean resource
-        context.close();
-    }
+    // clean resource
+    context.close();
+  }
 }

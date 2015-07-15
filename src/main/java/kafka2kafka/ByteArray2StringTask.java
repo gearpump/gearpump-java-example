@@ -28,43 +28,44 @@ import org.slf4j.Logger;
 
 public class ByteArray2StringTask extends Task {
 
-    private TaskContext context;
-    private UserConfig userConf;
+  private TaskContext context;
+  private UserConfig userConf;
 
-    private Logger LOG = super.LOG();
+  private Logger LOG = super.LOG();
 
-    public ByteArray2StringTask(TaskContext taskContext, UserConfig userConf) {
-        super(taskContext, userConf);
-        this.context = taskContext;
-        this.userConf = userConf;
+  public ByteArray2StringTask(TaskContext taskContext, UserConfig userConf) {
+    super(taskContext, userConf);
+    this.context = taskContext;
+    this.userConf = userConf;
+  }
+
+  private Long now() {
+    return System.currentTimeMillis();
+  }
+
+  @Override
+  public void onStart(StartTime startTime) {
+    LOG.info("ByteArray2StringTask.onStart [" + startTime + "]");
+  }
+
+  /**
+   * Convert message payload to String if it is byte[]. Leave as is otherwise.
+   *
+   * @param messagePayLoad
+   */
+  @Override
+  public void onNext(Message messagePayLoad) {
+    LOG.info("ByteArray2StringTask.onNext messagePayLoad = [" + messagePayLoad + "]");
+    LOG.debug("message.msg class" + messagePayLoad.msg().getClass().getCanonicalName());
+
+    Object msg = messagePayLoad.msg();
+
+    if (msg instanceof byte[]) {
+      LOG.debug("converting to String.");
+      context.output(new Message(new String((byte[]) msg), now()));
+    } else {
+      LOG.debug("sending message as is.");
+      context.output(new Message(msg, now()));
     }
-
-    private Long now() {
-        return System.currentTimeMillis();
-    }
-
-    @Override
-    public void onStart(StartTime startTime) {
-        LOG.info("ByteArray2StringTask.onStart [" + startTime + "]");
-    }
-
-    /**
-     * Convert message payload to String if it is byte[]. Leave as is otherwise.
-     * @param messagePayLoad
-     */
-    @Override
-    public void onNext(Message messagePayLoad) {
-        LOG.info("ByteArray2StringTask.onNext messagePayLoad = [" + messagePayLoad + "]");
-        LOG.debug("message.msg class" + messagePayLoad.msg().getClass().getCanonicalName());
-
-        Object msg = messagePayLoad.msg();
-
-        if (msg instanceof byte[]) {
-            LOG.debug("converting to String.");
-            context.output(new Message(new String((byte[]) msg), now()));
-        } else {
-            LOG.debug("sending message as is.");
-            context.output(new Message(msg, now()));
-        }
-    }
+  }
 }

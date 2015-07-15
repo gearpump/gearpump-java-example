@@ -31,42 +31,44 @@ import java.io.UnsupportedEncodingException;
 
 public class String2Tuple2Task extends Task {
 
-    private TaskContext context;
-    private UserConfig userConf;
+  private TaskContext context;
+  private UserConfig userConf;
 
-    private Logger LOG = super.LOG();
+  private Logger LOG = super.LOG();
 
-    public String2Tuple2Task(TaskContext taskContext, UserConfig userConf) {
-        super(taskContext, userConf);
-        this.context = taskContext;
-        this.userConf = userConf;
+  public String2Tuple2Task(TaskContext taskContext, UserConfig userConf) {
+    super(taskContext, userConf);
+    this.context = taskContext;
+    this.userConf = userConf;
+  }
+
+  private Long now() {
+    return System.currentTimeMillis();
+  }
+
+  @Override
+  public void onStart(StartTime startTime) {
+    LOG.info("String2Tuple2Task.onStart [" + startTime + "]");
+  }
+
+  @Override
+  public void onNext(Message messagePayLoad) {
+    LOG.info("String2Tuple2Task.onNext messagePayLoad = [" + messagePayLoad + "]");
+
+    Object msg = messagePayLoad.msg();
+
+    byte[] key = null;
+    byte[] value = null;
+    try {
+      LOG.info("converting to Tuple2");
+      key = "message".getBytes("UTF-8");
+      value = ((String) msg).getBytes("UTF-8");
+      Tuple2<byte[], byte[]> tuple = new Tuple2<byte[], byte[]>(key, value);
+      context.output(new Message(tuple, now()));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      LOG.info("sending message as is.");
+      context.output(new Message(msg, now()));
     }
-
-    private Long now() {
-        return System.currentTimeMillis();
-    }
-
-    @Override public void onStart(StartTime startTime) {
-        LOG.info("String2Tuple2Task.onStart [" + startTime + "]");
-    }
-
-    @Override public void onNext(Message messagePayLoad) {
-        LOG.info("String2Tuple2Task.onNext messagePayLoad = [" + messagePayLoad + "]");
-
-        Object msg = messagePayLoad.msg();
-
-        byte[] key = null;
-        byte[] value = null;
-        try {
-            LOG.info("converting to Tuple2");
-            key = "message".getBytes("UTF-8");
-            value = ((String) msg).getBytes("UTF-8");
-            Tuple2<byte[], byte[]> tuple = new Tuple2<byte[], byte[]>(key, value);
-            context.output(new Message(tuple, now()));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            LOG.info("sending message as is.");
-            context.output(new Message(msg, now()));
-        }
-    }
+  }
 }

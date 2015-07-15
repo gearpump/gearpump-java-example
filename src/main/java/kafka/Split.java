@@ -28,27 +28,29 @@ import org.apache.gearpump.cluster.UserConfig;
 
 public class Split extends Task {
 
-    private TaskContext context;
-    private UserConfig userConf;
+  private TaskContext context;
+  private UserConfig userConf;
 
-    public Split(TaskContext taskContext, UserConfig userConf) {
-        super(taskContext, userConf);
-        this.context = taskContext;
-        this.userConf = userConf;
-    }
+  public Split(TaskContext taskContext, UserConfig userConf) {
+    super(taskContext, userConf);
+    this.context = taskContext;
+    this.userConf = userConf;
+  }
 
-    private Long now() {
-        return System.currentTimeMillis();
-    }
+  private Long now() {
+    return System.currentTimeMillis();
+  }
 
-    public void onStart(StartTime startTime) {
-    }
+  @Override
+  public void onStart(StartTime startTime) {
+  }
 
-    public void onNext(Message message) {
-        String line = new String((byte[])(message.msg()));
-        String[] words = line.split("\\s+");
-        for (int i = 0; i < words.length; i++) {
-            context.output(new Message(words[i], now()));
-        }
+  @Override
+  public void onNext(Message message) {
+    String line = new String((byte[]) (message.msg()));
+    String[] words = line.split("\\s+");
+    for (int i = 0; i < words.length; i++) {
+      context.output(new Message(words[i], now()));
     }
+  }
 }

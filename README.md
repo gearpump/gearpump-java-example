@@ -20,7 +20,7 @@ To build the examples run:
 
 `mvn package`
 
-After build, there is a jar under `target/streaming-java-template-1.1-SNAPSHOT.jar`.
+After build, there is a jar under `target/streaming-java-template-$VERSION.jar`.
 
 ## Running an example
 
@@ -40,13 +40,13 @@ After build, there is a jar under `target/streaming-java-template-1.1-SNAPSHOT.j
 
 2. Submit the jar
   ```bash
-  bin/gear app -jar path/to/streaming-java-template-1.1-SNAPSHOT.jar <app mainclass with package> 
+  bin/gear app -jar path/to/streaming-java-template-$VERSION.jar <app mainclass with package> 
   ```
   
   for example:
   
   ```bash
-  bin/gear app -jar target/streaming-java-template-1.1-SNAPSHOT.jar javatemplate.WordCount 
+  bin/gear app -jar target/streaming-java-template-$VERSION.jar javatemplate.WordCount 
   ```
   
   
@@ -87,7 +87,7 @@ KafkaSink kafkaSink = new KafkaSink("outputTopic", "localhost:9092");
 ```
 
 Keep in mind, that Kafka source processor produces message as byte array (`byte[]`). 
-Also, Kafka sink procesor expects the message to be scala.Tuple. 
+Also, Kafka sink processor expects the message to be scala.Tuple. 
 
 The example shows dedicated steps that do the necessary conversions. 
 (The conversions don't need to be a separate step, you could include them in other task that do actual computation.)  
@@ -105,7 +105,7 @@ kafka/bin/kafka-server-start.sh kafka/config/server.properties
 
 (Tested with zookeeper 3.4.6 and Kafka 2.11-0.8.2.1. with default settings.)
 
-The app will read messages from `inputTopic` and write to `outputTopic`, so you need to create them beforehand:
+The app will read messages from `inputTopic` and write to `outputTopic`, so you may need to create them beforehand:
 
 ```bash
 kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic inputTopic
