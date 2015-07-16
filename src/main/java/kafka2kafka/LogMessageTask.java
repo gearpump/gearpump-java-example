@@ -17,21 +17,23 @@
  *
  */
 
-package kafka;
+package kafka2kafka;
 
 import org.apache.gearpump.Message;
+import org.apache.gearpump.cluster.UserConfig;
 import org.apache.gearpump.streaming.task.StartTime;
 import org.apache.gearpump.streaming.task.Task;
 import org.apache.gearpump.streaming.task.TaskContext;
-import org.apache.gearpump.cluster.UserConfig;
+import org.slf4j.Logger;
 
-
-public class Split extends Task {
+public class LogMessageTask extends Task {
 
   private TaskContext context;
   private UserConfig userConf;
 
-  public Split(TaskContext taskContext, UserConfig userConf) {
+  private Logger LOG = super.LOG();
+
+  public LogMessageTask(TaskContext taskContext, UserConfig userConf) {
     super(taskContext, userConf);
     this.context = taskContext;
     this.userConf = userConf;
@@ -43,14 +45,12 @@ public class Split extends Task {
 
   @Override
   public void onStart(StartTime startTime) {
+    LOG.info("LogMessageTask.onStart startTime [" + startTime + "]");
   }
 
   @Override
-  public void onNext(Message message) {
-    String line = new String((byte[]) (message.msg()));
-    String[] words = line.split("\\s+");
-    for (int i = 0; i < words.length; i++) {
-      context.output(new Message(words[i], now()));
-    }
+  public void onNext(Message messagePayLoad) {
+    LOG.info("LogMessageTask.onNext messagePayLoad = [" + messagePayLoad + "]");
+    context.output(new Message(messagePayLoad.msg(), now()));
   }
 }

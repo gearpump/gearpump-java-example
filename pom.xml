@@ -8,7 +8,7 @@
     <artifactId>streaming-java-template</artifactId>
     <version>1.1-SNAPSHOT</version>
     <properties>
-        <gearpumpVersion>0.3.8-SNAPSHOT</gearpumpVersion>
+        <gearpumpVersion>0.4</gearpumpVersion>
     </properties>
 
 
@@ -66,7 +66,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.7</version>
                 <configuration>
                     <outputDirectory>${project.build.outputDirectory}/resources</outputDirectory>
                 </configuration>
