@@ -18,23 +18,18 @@
 
 package javatemplate;
 
-import org.apache.gearpump.Message;
-import org.apache.gearpump.streaming.task.StartTime;
-import org.apache.gearpump.streaming.task.Task;
-import org.apache.gearpump.streaming.task.TaskContext;
-import org.apache.gearpump.cluster.UserConfig;
+import io.gearpump.Message;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.streaming.javaapi.Task;
+import io.gearpump.streaming.task.StartTime;
+import io.gearpump.streaming.task.TaskContext;
 
 public class Split extends Task {
 
   public static String TEXT = "This is a good start for java! bingo! bingo! ";
 
-  private TaskContext context;
-  private UserConfig userConf;
-
   public Split(TaskContext taskContext, UserConfig userConf) {
     super(taskContext, userConf);
-    this.context = taskContext;
-    this.userConf = userConf;
   }
 
   private Long now() {

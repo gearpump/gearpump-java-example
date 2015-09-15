@@ -19,12 +19,12 @@
 
 package kafka;
 
-import org.apache.gearpump.Message;
-import org.apache.gearpump.cluster.UserConfig;
-import org.apache.gearpump.external.hbase.HBaseSink;
-import org.apache.gearpump.streaming.task.StartTime;
-import org.apache.gearpump.streaming.task.Task;
-import org.apache.gearpump.streaming.task.TaskContext;
+import io.gearpump.Message;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.external.hbase.HBaseSink;
+import io.gearpump.streaming.task.StartTime;
+import io.gearpump.streaming.task.Task;
+import io.gearpump.streaming.task.TaskContext;
 import org.apache.hadoop.conf.Configuration;
 
 public class HBaseSinkTask extends Task {

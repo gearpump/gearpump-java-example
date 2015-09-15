@@ -19,19 +19,17 @@
 
 package kafka2kafka;
 
-import org.apache.gearpump.cluster.UserConfig;
-import org.apache.gearpump.cluster.client.ClientContext;
-import org.apache.gearpump.partitioner.HashPartitioner;
-import org.apache.gearpump.partitioner.Partitioner;
-import org.apache.gearpump.partitioner.ShufflePartitioner;
-import org.apache.gearpump.streaming.Processor;
-import org.apache.gearpump.streaming.Processor.DefaultProcessor;
-import org.apache.gearpump.streaming.StreamApplication;
-import org.apache.gearpump.streaming.kafka.KafkaSink;
-import org.apache.gearpump.streaming.kafka.KafkaSource;
-import org.apache.gearpump.streaming.sink.DataSinkProcessor;
-import org.apache.gearpump.streaming.source.DataSourceProcessor;
-import org.apache.gearpump.util.Graph;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.cluster.client.ClientContext;
+import io.gearpump.partitioner.HashPartitioner;
+import io.gearpump.partitioner.Partitioner;
+import io.gearpump.partitioner.ShufflePartitioner;
+import io.gearpump.streaming.javaapi.Graph;
+import io.gearpump.streaming.javaapi.Processor;
+import io.gearpump.streaming.javaapi.StreamApplication;
+import io.gearpump.streaming.kafka.KafkaSink;
+import io.gearpump.streaming.kafka.KafkaSource;
+import io.gearpump.streaming.kafka.KafkaStorageFactory;
 
 public class PipelineApp {
 
@@ -41,25 +39,27 @@ public class PipelineApp {
 
     int taskNumber = 1;
 
+    KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory("localhost:2181", "localhost:9092");
+
     // kafka source
-    KafkaSource kafkaSource = new KafkaSource("inputTopic", "localhost:2181");
-    Processor sourceProcessor = DataSourceProcessor.apply(kafkaSource, taskNumber, "kafkaSource",
+    KafkaSource kafkaSource = new KafkaSource("inputTopic", "localhost:2181", offsetStorageFactory);
+    Processor sourceProcessor = Processor.source(kafkaSource, taskNumber, "kafkaSource",
         appConfig, context.system());
 
     // converter (converts byte[] message to String -- kafka produces byte[])
-    Processor convert2StringProcessor = new DefaultProcessor(taskNumber, "converter", null, ByteArray2StringTask.class);
+    Processor convert2StringProcessor = new Processor(ByteArray2StringTask.class, taskNumber, "converter", null);
 
     // converter (converts String message to scala.Tuple2 -- kafka sink needs it)
-    Processor convert2TupleProcessor = new DefaultProcessor(taskNumber, "converter", null, String2Tuple2Task.class);
+    Processor convert2TupleProcessor = new Processor(String2Tuple2Task.class, taskNumber, "converter", null);
 
     // simple processor (represents processing you would do on kafka messages stream; writes payload to logs)
-    Processor logProcessor = new DefaultProcessor(taskNumber, "forwarder", null, LogMessageTask.class);
+    Processor logProcessor = new Processor(LogMessageTask.class, taskNumber, "forwarder", null);
 
     // kafka sink
     KafkaSink kafkaSink = new KafkaSink("outputTopic", "localhost:9092");
-    Processor sinkProcessor = DataSinkProcessor.apply(kafkaSink, taskNumber, "sink", appConfig, context.system());
+    Processor sinkProcessor = Processor.sink(kafkaSink, taskNumber, "sink", appConfig, context.system());
 
-    Graph graph = Graph.empty();
+    Graph graph = new Graph();
     graph.addVertex(sourceProcessor);
     graph.addVertex(convert2StringProcessor);
     graph.addVertex(logProcessor);
@@ -75,7 +75,7 @@ public class PipelineApp {
     graph.addEdge(convert2TupleProcessor, partitioner, sinkProcessor);
 
     // submit app
-    StreamApplication app = StreamApplication.apply("kafka2kafka", graph, appConfig);
+    StreamApplication app = new StreamApplication("kafka2kafka", appConfig, graph);
     context.submit(app);
 
     // clean resource

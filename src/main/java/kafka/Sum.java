@@ -19,27 +19,22 @@
 
 package kafka;
 
-import org.apache.gearpump.Message;
-import org.apache.gearpump.cluster.UserConfig;
-import org.apache.gearpump.streaming.task.StartTime;
-import org.apache.gearpump.streaming.task.Task;
-import org.apache.gearpump.streaming.task.TaskContext;
+import io.gearpump.Message;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.streaming.javaapi.Task;
+import io.gearpump.streaming.task.StartTime;
+import io.gearpump.streaming.task.TaskContext;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
 
 public class Sum extends Task {
 
-  private TaskContext context;
-  private UserConfig userConf;
-
   private Logger LOG = super.LOG();
   private HashMap<String, Integer> wordCount = new HashMap<String, Integer>();
 
   public Sum(TaskContext taskContext, UserConfig userConf) {
     super(taskContext, userConf);
-    this.context = taskContext;
-    this.userConf = userConf;
   }
 
   @Override

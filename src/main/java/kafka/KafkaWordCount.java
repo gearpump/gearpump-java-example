@@ -19,18 +19,16 @@
 
 package kafka;
 
-
-import org.apache.gearpump.cluster.UserConfig;
-import org.apache.gearpump.cluster.client.ClientContext;
-import org.apache.gearpump.partitioner.HashPartitioner;
-import org.apache.gearpump.partitioner.Partitioner;
-import org.apache.gearpump.partitioner.ShufflePartitioner;
-import org.apache.gearpump.streaming.Processor;
-import org.apache.gearpump.streaming.Processor.DefaultProcessor;
-import org.apache.gearpump.streaming.StreamApplication;
-import org.apache.gearpump.streaming.kafka.KafkaSource;
-import org.apache.gearpump.streaming.source.DataSourceProcessor;
-import org.apache.gearpump.util.Graph;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.cluster.client.ClientContext;
+import io.gearpump.partitioner.HashPartitioner;
+import io.gearpump.partitioner.Partitioner;
+import io.gearpump.partitioner.ShufflePartitioner;
+import io.gearpump.streaming.javaapi.Graph;
+import io.gearpump.streaming.javaapi.Processor;
+import io.gearpump.streaming.javaapi.StreamApplication;
+import io.gearpump.streaming.kafka.KafkaSource;
+import io.gearpump.streaming.kafka.KafkaStorageFactory;
 
 public class KafkaWordCount {
 
@@ -43,16 +41,19 @@ public class KafkaWordCount {
     // we will create two kafka reader task to read from kafka queue.
     int sourceNum = 2;
     // please create "topic1" on kafka and produce some data to it
-    KafkaSource source = new KafkaSource("topic1", "localhost:2181");
-    Processor sourceProcessor = DataSourceProcessor.apply(source, sourceNum, "kafka_source", appConfig, context.system());
+
+    KafkaStorageFactory offsetStorageFactory = new KafkaStorageFactory("localhost:2181", "localhost:9092");
+
+    KafkaSource source = new KafkaSource("topic1", "localhost:2181", offsetStorageFactory);
+    Processor sourceProcessor = Processor.source(source, sourceNum, "kafka_source", appConfig, context.system());
 
     // For split task, we config to create two tasks
     int splitTaskNumber = 2;
-    Processor split = new DefaultProcessor(splitTaskNumber, "split", null, Split.class);
+    Processor split = new Processor(Split.class, splitTaskNumber);
 
     // sum task
     int sumTaskNumber = 2;
-    Processor sum = new DefaultProcessor(sumTaskNumber, "sum", null, Sum.class);
+    Processor sum = new Processor(Sum.class, sumTaskNumber);
 
     // hbase sink
     int sinkNumber = 2;
@@ -61,13 +62,14 @@ public class KafkaWordCount {
         UserConfig.empty().withString(HBaseSinkTask.ZOOKEEPER_QUORUM, "localhost:2181")
             .withString(HBaseSinkTask.TABLE_NAME, "pipeline")
             .withString(HBaseSinkTask.COLUMN_FAMILY, "wordcount");
-    Processor sinkProcessor = new DefaultProcessor(sinkNumber, "hbase_sink", config, HBaseSinkTask.class);
+
+    Processor sinkProcessor = new Processor(HBaseSinkTask.class, sinkNumber, "hbase_sink", config);
 
 
     Partitioner shuffle = new ShufflePartitioner();
     Partitioner hash = new HashPartitioner();
 
-    Graph graph = Graph.empty();
+    Graph graph = new Graph();
     graph.addVertex(sourceProcessor);
     graph.addVertex(split);
     graph.addVertex(sum);
@@ -77,7 +79,7 @@ public class KafkaWordCount {
     graph.addEdge(split, hash, sum);
     graph.addEdge(sum, hash, sinkProcessor);
 
-    StreamApplication app = StreamApplication.apply("KafkaWordCount", graph, appConfig);
+    StreamApplication app = new StreamApplication("KafkaWordCount", appConfig, graph);
 
     context.submit(app);
 

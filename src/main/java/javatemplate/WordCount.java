@@ -18,43 +18,53 @@
 
 package javatemplate;
 
-import org.apache.gearpump.cluster.UserConfig;
-import org.apache.gearpump.cluster.client.ClientContext;
-import org.apache.gearpump.partitioner.HashPartitioner;
-import org.apache.gearpump.partitioner.Partitioner;
-import org.apache.gearpump.streaming.Processor;
-import org.apache.gearpump.streaming.Processor.DefaultProcessor;
-import org.apache.gearpump.streaming.StreamApplication;
-import org.apache.gearpump.streaming.task.Task;
-import org.apache.gearpump.util.Graph;
+import com.typesafe.config.Config;
+import io.gearpump.cluster.ClusterConfig;
+import io.gearpump.cluster.UserConfig;
+import io.gearpump.cluster.client.ClientContext;
+import io.gearpump.partitioner.HashPartitioner;
+import io.gearpump.partitioner.Partitioner;
+import io.gearpump.streaming.javaapi.Graph;
+import io.gearpump.streaming.javaapi.Processor;
+import io.gearpump.streaming.javaapi.StreamApplication;
 
 public class WordCount {
 
   public static void main(String[] args) {
+    main(ClusterConfig.defaultConfig(), args);
+  }
 
-    ClientContext context = ClientContext.apply();
+  public static void main(Config akkaConf, String[] args) {
 
     // For split task, we config to create two tasks
     int splitTaskNumber = 2;
-    Processor split = new DefaultProcessor(splitTaskNumber, null, null, Split.class);
+    Processor split = new Processor(Split.class).withParallelism(splitTaskNumber);
 
     // For sum task, we have two summer.
     int sumTaskNumber = 2;
-    Processor sum = new DefaultProcessor(sumTaskNumber, null, null, Sum.class);
-
-    Graph graph = Graph.empty();
+    Processor sum = new Processor(Sum.class).withParallelism(sumTaskNumber);
 
     // construct the graph
+    Graph graph = new Graph();
     graph.addVertex(split);
     graph.addVertex(sum);
+
     Partitioner partitioner = new HashPartitioner();
     graph.addEdge(split, partitioner, sum);
 
+
+    UserConfig conf = UserConfig.empty();
+    StreamApplication app = new StreamApplication("wordcountJava", conf, graph);
+
+    // create master client
+    // It will read the master settings under gearpump.cluster.masters
+    ClientContext masterClient = new ClientContext(akkaConf);
+
     // submit
-    StreamApplication app = StreamApplication.apply("javawordcount", graph, UserConfig.empty());
-    context.submit(app);
+    int appId = masterClient.submit(app);
+    System.out.println("Application Id is " + Integer.toString(appId));
 
     // clean resource
-    context.close();
+    masterClient.close();
   }
 }
