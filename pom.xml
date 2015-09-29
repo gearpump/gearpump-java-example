@@ -36,6 +36,12 @@
             <name>Patrik at Bintray</name>
             <url>http://dl.bintray.com/patriknw/maven</url>
         </repository>
+
+        <repository>
+            <id>gearpump-shaded-repo</id>
+            <name>Vincent at Bintray</name>
+            <url>http://dl.bintray.com/fvunicorn/maven</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -43,11 +49,13 @@
             <groupId>com.github.intel-hadoop</groupId>
             <artifactId>gearpump-core_2.11</artifactId>
             <version>${gearpumpVersion}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.intel-hadoop</groupId>
             <artifactId>gearpump-streaming_2.11</artifactId>
             <version>${gearpumpVersion}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.intel-hadoop</groupId>
@@ -63,6 +71,23 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

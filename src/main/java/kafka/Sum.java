@@ -44,7 +44,7 @@ public class Sum extends Task {
 
   @Override
   public void onNext(Message message) {
-    String word = (String)(message.msg());
+    String word = (String) (message.msg());
     Integer current = wordCount.get(word);
     if (current == null) {
       current = 0;
