@@ -6,7 +6,7 @@
 
     <groupId>com.github.intel-hadoop</groupId>
     <artifactId>streaming-java-template</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>gearpump0.7.5</version>
     <properties>
         <gearpumpVersion>0.7.5</gearpumpVersion>
     </properties>
