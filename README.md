@@ -58,15 +58,15 @@ After build, there is a jar under `target/streaming-java-template-$VERSION.jar`.
 
 > NOTE:
 > 
-> Please use Java7 to run the cluster.
+> Please use Java8 to run the cluster because Gearpump 0.8.0 only support Java 8.
 > 
 > You can set the ENV JAVA_HOME.
 
 > On windows:
-> set JAVA_HOME={path_to_java_7}
+> set JAVA_HOME={path_to_java_8}
 > 
 > On Linux
-> export JAVA_HOME={path_to_java_7}
+> export JAVA_HOME={path_to_java_8}
 
 # Examples description
 
